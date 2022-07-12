@@ -24,7 +24,7 @@
     let zNode = document.createElement('div');
     zNode.innerHTML = '<a id="spy-copy-btn" href="#" class="float">Copy <i class="fa fa-copy my-float"></i></a>'
         + '<a id="spy-parse-btn" href="#" class="float">Parse <i class="fa fa-search my-float"></i></a>'
-        + '<table style="display:block;" id="spy-parse-tbl"><thead><tr><th>Name</th><th>Level</th><th>Strength</th><th>Defense</th><th>Speed</th><th>Dexterity</th><th>Total</th><th>Updated</th></tr></thead>'
+        + '<table style="display:none;" id="spy-parse-tbl"><thead><tr><th>Name</th><th>Level</th><th>Strength</th><th>Defense</th><th>Speed</th><th>Dexterity</th><th>Total</th><th>Updated</th></tr></thead>'
         + '<tbody></tbody>';
     zNode.setAttribute('id', 'spy-parse-container');
     document.body.appendChild(zNode);
@@ -54,7 +54,7 @@ Total: ${x.TotalPrettified}
     for (let key in unsafeWindow.spyReports){
         spyReports += spyReportTemplate(unsafeWindow.spyReports[key]);
     }
-    if (unsafeWindow.spyReports.length > 0){
+    if (Object.entries(unsafeWindow.spyReports).length > 0){
         navigator.clipboard.writeText(spyReports)
             .then(function(){
                 copyBtn.innerHTML = 'Copied! <i class="fa fa-copy my-float"></i>';
@@ -75,6 +75,8 @@ function GetSpyResult(zEvent){
         let spyProfile = GetSpyProfile();
         AddSpyProfile(spyProfile);
         parseBtn.innerHTML = 'Parsed! <i class="fa fa-search my-float"></i>';
+        let spyTable = document.querySelector("#spy-parse-tbl");
+        spyTable.style.display = 'block';
     } catch (error) {
         console.error(error);
         parseBtn.innerHTML = 'Failed! <i class="fa fa-search my-float"></i>';
@@ -193,7 +195,6 @@ function AddSpyProfile(spyProfile){
     }
     localStorage.setItem(`spy-parse-${spyProfile.Id}`, JSON.stringify(spyProfile));
     unsafeWindow.spyReports[spyProfile.Id] = spyProfile;
-    spyTableBody.style.display = 'block';
 }
 
 function FlashElement(element){
