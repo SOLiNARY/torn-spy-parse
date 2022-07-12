@@ -1,0 +1,62 @@
+div#spy-parse-container {
+    font-family: Verdana, Geneva, sans-serif;
+    background-color: #CCC;
+}
+
+#spy-parse-btn {
+    top: 40px;
+    right: 40px;
+}
+
+#spy-copy-btn {
+    top: 40px;
+    right: 160px;
+}
+
+.float {
+    text-decoration: none;
+    position: fixed;
+    width: auto;
+    height: 60px;
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: #00144e;
+    color: #FFF;
+    border-radius: 50px;
+    text-align: center;
+    box-shadow: 2px 2px 3px #999;
+    font-size: 18px !important;
+}
+
+.my-float {
+    margin-top: 22px;
+}
+
+#spy-parse-tbl {
+    position: fixed;
+    top: 103px;
+    right: 40px;
+    font-family: arial, sans-serif;
+    font-size: small;
+    border-collapse: collapse;
+    width: auto;
+}
+
+#spy-parse-tbl tr {
+    transition: background-color 400ms cubic-bezier(0.4, 0, 0.2, 1);;
+}
+
+#spy-parse-tbl td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+    transition: background-color 400ms cubic-bezier(0.4, 0, 0.2, 1);;
+}
+
+#spy-parse-tbl tbody tr:nth-child(even) {
+    background-color: #d1d1d1;
+}
+
+#spy-parse-tbl tbody tr:nth-child(odd) {
+    background-color: white;
+}
