@@ -3,7 +3,7 @@
 // @namespace    https://github.com/SOLiNARY
 // @downloadURL  https://raw.githubusercontent.com/SOLiNARY/torn-spy-parse/master/torn-spy-parse.user.js
 // @updateURL    https://raw.githubusercontent.com/SOLiNARY/torn-spy-parse/master/torn-spy-parse.meta.js
-// @version      0.1
+// @version      0.2
 // @description  Parse spy reports & save them in local storage
 // @author       Ramin Quluzade
 // @license      MIT License
@@ -19,6 +19,19 @@
 (function() {
     'use strict';
 
+    const SpyJobs = {
+        Army: 10,
+        LawFirm: 20,
+        TelevisionNetwork: 30,
+        None: 0
+    }
+    unsafeWindow.SpyJobs = SpyJobs;
+    const SpyJobsMapping = {
+        "Type: Army": SpyJobs.Army,
+        "Type: Law Firm": SpyJobs.LawFirm,
+        "Type: Television Network": SpyJobs.TelevisionNetwork
+    }
+
     const main_css = GM_getResourceText("MAIN_CSS");
     GM_addStyle(main_css);
 
@@ -31,6 +44,18 @@
     document.body.appendChild(zNode);
     document.getElementById("spy-parse-btn").addEventListener("click", GetSpyResult, false);
     document.getElementById("spy-copy-btn").addEventListener("click", CopySpyResults, false);
+
+    let jobTitleBlock = document.querySelector("#mainContainer > div.content-wrapper > div.company-wrap > div.company-details-wrap > ul.company-stats-list.company-info > li:nth-child(1) > div.details-wrap.t-first.t-first-row");
+    if (jobTitleBlock){
+        try {
+            unsafeWindow.playerJob = SpyJobsMapping[jobTitleBlock.innerText];
+        } catch (error){
+            unsafeWindow.playerJob = SpyJobs.None;
+            console.error("Unsupported player job detected: %s", jobTitleBlock.innerText.substr(6));
+        }
+        console.log("Player job: %s", unsafeWindow.playerJob);
+        console.log(unsafeWindow.playerJob == SpyJobs.TelevisionNetwork);
+    }
     if (unsafeWindow.spyReports == undefined) {
         unsafeWindow.spyReports = {};
     }
@@ -41,7 +66,7 @@ function CopySpyResults(zEvent){
     let copyBtn = zEvent.target;
     let copyBtnHtml = copyBtn.innerHTML;
     const spyReportTemplate = (x) =>
-`
+        `
 Name: ${x.Name}
 Level: ${x.Level}
 You managed to get the following results:
@@ -86,12 +111,23 @@ function GetSpyResult(zEvent){
 }
 
 function GetSpyProfile(){
-    let jobSpecialBlock = document.getElementsByName("jobspecial")[0];
-    let userLink = jobSpecialBlock.querySelector("div > div:nth-child(3) > div > span.desc > a");
-    if (userLink == null){
-
+    let jobSpecialBlock, userLink, levelSpan;
+    switch (unsafeWindow.playerJob){
+        default:
+        case SpyJobs.Army:
+            jobSpecialBlock = document.getElementsByName("jobspecial")[0];
+            userLink = jobSpecialBlock.querySelector("div > div:nth-child(3) > div > span.desc > a");
+            levelSpan = jobSpecialBlock.querySelector("div > div:nth-child(3) > div:nth-child(2) > span.desc");
+            break;
+        case SpyJobs.LawFirm:
+            break;
+        case SpyJobs.TelevisionNetwork:
+            jobSpecialBlock = document.getElementsByClassName("specials-cont-wrap")[0].querySelector("div.specials-confirm-cont");
+            userLink = jobSpecialBlock.querySelector("div > div:nth-child(2) > div > span.desc > a");
+            levelSpan = jobSpecialBlock.querySelector("div > div:nth-child(2) > div:nth-child(2) > span.desc");
+            break;
     }
-    let levelSpan = jobSpecialBlock.querySelector("div > div:nth-child(3) > div:nth-child(2) > span.desc");
+
     let id = Number(userLink.href.substr(userLink.href.search("XID=") + 4));
     let name = userLink.innerText;
     let level = Number(levelSpan.innerText);
@@ -100,31 +136,45 @@ function GetSpyProfile(){
     let speed = 0;
     let dexterity = 0;
     let total = 0;
-    let statsBlock = jobSpecialBlock.querySelector("div.specials-confirm-cont > div:nth-child(5) > ul");
-    let strengthBlock = statsBlock.querySelector("li.left.t-c-border");
-    if (strengthBlock.innerText.search("Strength:") > -1){
-        strength = Number(strengthBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
+    if (unsafeWindow.playerJob == SpyJobs.TelevisionNetwork){
+        let statsBlock = jobSpecialBlock.querySelector("div > ul");
+        strength = Number(statsBlock.children[1].innerText.substr(10).replaceAll(',', ''));
         if (isNaN(strength)) strength = 0;
-    }
-    let defenseBlock = statsBlock.querySelector("li.left.t-r-border");
-    if (defenseBlock.innerText.search("Defense:") > -1){
-        defense = Number(defenseBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
+        defense = Number(statsBlock.children[4].innerText.substr(9).replaceAll(',', ''));
         if (isNaN(defense)) defense = 0;
-    }
-    let speedBlock = statsBlock.querySelector("li.left.t-l-border");
-    if (speedBlock.innerText.search("Speed:") > -1){
-        speed = Number(speedBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
+        speed = Number(statsBlock.children[2].innerText.substr(7).replaceAll(',', ''));
         if (isNaN(speed)) speed = 0;
-    }
-    let dexterityBlock = statsBlock.querySelector("li.left.b-l-border");
-    if (dexterityBlock.innerText.search("Dexterity:") > -1){
-        dexterity = Number(dexterityBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
+        dexterity = Number(statsBlock.children[3].innerText.substr(11).replaceAll(',', ''));
         if (isNaN(dexterity)) dexterity = 0;
-    }
-    let totalBlock = statsBlock.querySelector("li.left.b-c-border");
-    if (totalBlock.innerText.search("Total:") > -1){
-        total = Number(totalBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
+        total = Number(statsBlock.children[5].innerText.substr(7).replaceAll(',', ''));
         if (isNaN(total)) total = 0;
+    } else if (unsafeWindow.playerJob == SpyJobs.Army) {
+        let statsBlock = jobSpecialBlock.querySelector("div.specials-confirm-cont > div:nth-child(5) > ul");
+        let strengthBlock = statsBlock.querySelector("li.left.t-c-border");
+        if (strengthBlock.innerText.search("Strength:") > -1){
+            strength = Number(strengthBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
+            if (isNaN(strength)) strength = 0;
+        }
+        let defenseBlock = statsBlock.querySelector("li.left.t-r-border");
+        if (defenseBlock.innerText.search("Defense:") > -1){
+            defense = Number(defenseBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
+            if (isNaN(defense)) defense = 0;
+        }
+        let speedBlock = statsBlock.querySelector("li.left.t-l-border");
+        if (speedBlock.innerText.search("Speed:") > -1){
+            speed = Number(speedBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
+            if (isNaN(speed)) speed = 0;
+        }
+        let dexterityBlock = statsBlock.querySelector("li.left.b-l-border");
+        if (dexterityBlock.innerText.search("Dexterity:") > -1){
+            dexterity = Number(dexterityBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
+            if (isNaN(dexterity)) dexterity = 0;
+        }
+        let totalBlock = statsBlock.querySelector("li.left.b-c-border");
+        if (totalBlock.innerText.search("Total:") > -1){
+            total = Number(totalBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
+            if (isNaN(total)) total = 0;
+        }
     }
 
     return new SpyReport(id, name, level, strength, defense, speed, dexterity, total, new Date());
