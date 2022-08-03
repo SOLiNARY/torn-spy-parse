@@ -1,31 +1,35 @@
 div#spy-parse-container {
     font-family: Verdana, Geneva, sans-serif;
     background-color: #CCC;
+    text-align: center;
 }
 
 #spy-parse-btn {
-    top: 40px;
     right: 40px;
 }
 
 #spy-copy-btn {
-    top: 40px;
     right: 160px;
 }
 
 .float {
+    width: 125px;
+    height: 50px;
+    margin: 0 auto;
+    padding: 0;
+    display: inline-block;
+    line-height: 50px;
+    text-align: center;
+    top: 40px;
     text-decoration: none;
     position: fixed;
-    width: auto;
-    height: 60px;
     padding-left: 20px;
     padding-right: 20px;
     background-color: #00144e;
     color: #FFF;
     border-radius: 50px;
-    text-align: center;
     box-shadow: 2px 2px 3px #999;
-    font-size: 18px !important;
+    font-size: 18px;
 }
 
 .my-float {
