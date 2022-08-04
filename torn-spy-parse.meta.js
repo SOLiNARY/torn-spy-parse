@@ -3,7 +3,7 @@
 // @namespace    https://github.com/SOLiNARY
 // @downloadURL  https://raw.githubusercontent.com/SOLiNARY/torn-spy-parse/master/torn-spy-parse.user.js
 // @updateURL    https://raw.githubusercontent.com/SOLiNARY/torn-spy-parse/master/torn-spy-parse.meta.js
-// @version      0.2
+// @version      0.3
 // @description  Parse spy reports & save them in local storage
 // @author       Ramin Quluzade
 // @license      MIT License

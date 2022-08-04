@@ -3,7 +3,7 @@
 // @namespace    https://github.com/SOLiNARY
 // @downloadURL  https://raw.githubusercontent.com/SOLiNARY/torn-spy-parse/master/torn-spy-parse.user.js
 // @updateURL    https://raw.githubusercontent.com/SOLiNARY/torn-spy-parse/master/torn-spy-parse.meta.js
-// @version      0.2
+// @version      0.3
 // @description  Parse spy reports & save them in local storage
 // @author       Ramin Quluzade
 // @license      MIT License
@@ -120,7 +120,6 @@ function GetSpyProfile(){
             levelSpan = jobSpecialBlock.querySelector("div > div:nth-child(3) > div:nth-child(2) > span.desc");
             break;
         case SpyJobs.LawFirm:
-            break;
         case SpyJobs.TelevisionNetwork:
             jobSpecialBlock = document.getElementsByClassName("specials-cont-wrap")[0].querySelector("div.specials-confirm-cont");
             userLink = jobSpecialBlock.querySelector("div > div:nth-child(2) > div > span.desc > a");
@@ -136,17 +135,18 @@ function GetSpyProfile(){
     let speed = 0;
     let dexterity = 0;
     let total = 0;
-    if (unsafeWindow.playerJob == SpyJobs.TelevisionNetwork){
+    if (unsafeWindow.playerJob == SpyJobs.TelevisionNetwork || unsafeWindow.playerJob == SpyJobs.LawFirm){
+        let statOffset = unsafeWindow.playerJob == SpyJobs.TelevisionNetwork ? 1 : 0;
         let statsBlock = jobSpecialBlock.querySelector("div > ul");
-        strength = Number(statsBlock.children[1].innerText.substr(10).replaceAll(',', ''));
+        strength = Number(statsBlock.children[0+statOffset].innerText.substr(10).replaceAll(',', ''));
         if (isNaN(strength)) strength = 0;
-        defense = Number(statsBlock.children[4].innerText.substr(9).replaceAll(',', ''));
+        defense = Number(statsBlock.children[3+statOffset].innerText.substr(9).replaceAll(',', ''));
         if (isNaN(defense)) defense = 0;
-        speed = Number(statsBlock.children[2].innerText.substr(7).replaceAll(',', ''));
+        speed = Number(statsBlock.children[1+statOffset].innerText.substr(7).replaceAll(',', ''));
         if (isNaN(speed)) speed = 0;
-        dexterity = Number(statsBlock.children[3].innerText.substr(11).replaceAll(',', ''));
+        dexterity = Number(statsBlock.children[2+statOffset].innerText.substr(11).replaceAll(',', ''));
         if (isNaN(dexterity)) dexterity = 0;
-        total = Number(statsBlock.children[5].innerText.substr(7).replaceAll(',', ''));
+        total = Number(statsBlock.children[4+statOffset].innerText.substr(7).replaceAll(',', ''));
         if (isNaN(total)) total = 0;
     } else if (unsafeWindow.playerJob == SpyJobs.Army) {
         let statsBlock = jobSpecialBlock.querySelector("div.specials-confirm-cont > div:nth-child(5) > ul");
