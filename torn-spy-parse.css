@@ -5,15 +5,15 @@ div#spy-parse-container {
 }
 
 #spy-parse-btn {
-    right: 40px;
+    right: 20px;
 }
 
 #spy-copy-btn {
-    right: 160px;
+    right: 180px;
 }
 
 .float {
-    width: 70px;
+    width: 90px;
     height: 50px;
     margin: 0 auto;
     padding: 0;
