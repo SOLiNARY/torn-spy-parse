@@ -3,7 +3,7 @@
 // @namespace    https://github.com/SOLiNARY
 // @downloadURL  https://raw.githubusercontent.com/SOLiNARY/torn-spy-parse/master/torn-spy-parse.user.js
 // @updateURL    https://raw.githubusercontent.com/SOLiNARY/torn-spy-parse/master/torn-spy-parse.meta.js
-// @version      0.3.1
+// @version      0.3.2
 // @description  Parse spy reports & save them in local storage
 // @author       Ramin Quluzade
 // @license      MIT License
@@ -16,7 +16,7 @@
 // @grant        GM_addStyle
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     const SpyJobs = {
@@ -45,28 +45,32 @@
     document.getElementById("spy-parse-btn").addEventListener("click", GetSpyResult, false);
     document.getElementById("spy-copy-btn").addEventListener("click", CopySpyResults, false);
 
-    let jobTitleBlock = document.querySelector("#mainContainer > div.content-wrapper > div.company-wrap > div.company-details-wrap > ul.company-stats-list.company-info > li:nth-child(1) > div.details-wrap.t-first.t-first-row");
-    if (jobTitleBlock){
-        try {
-            unsafeWindow.playerJob = SpyJobsMapping[jobTitleBlock.innerText];
-        } catch (error){
-            unsafeWindow.playerJob = SpyJobs.None;
-            console.error("Unsupported player job detected: %s", jobTitleBlock.innerText.substr(6));
+    if (location.pathname.startsWith("/jobs.php")) {
+        unsafeWindow.playerJob = SpyJobs.Army;
+    } else if (location.pathname.startsWith("/companies.php")) {
+        let jobTitleBlock = document.querySelector("#mainContainer > div.content-wrapper > div.company-wrap > div.company-details-wrap > ul.company-stats-list.company-info > li:nth-child(1) > div.details-wrap.t-first.t-first-row");
+        if (jobTitleBlock) {
+            try {
+                unsafeWindow.playerJob = SpyJobsMapping[jobTitleBlock.innerText];
+            } catch (error) {
+                unsafeWindow.playerJob = SpyJobs.None;
+            }
         }
-        console.log("Player job: %s", unsafeWindow.playerJob);
-        console.log(unsafeWindow.playerJob == SpyJobs.TelevisionNetwork);
+    } else {
+        unsafeWindow.playerJob = SpyJobs.None;
     }
+    console.log("Player job: %s", unsafeWindow.playerJob);
     if (unsafeWindow.spyReports == undefined) {
         unsafeWindow.spyReports = {};
     }
 })();
 
-function CopySpyResults(zEvent){
+function CopySpyResults(zEvent) {
     zEvent.preventDefault();
     let copyBtn = zEvent.target;
     let copyBtnHtml = copyBtn.innerHTML;
     const spyReportTemplate = (x) =>
-        `
+`
 Name: ${x.Name}
 Level: ${x.Level}
 You managed to get the following results:
@@ -77,23 +81,25 @@ Defense: ${x.DefensePrettified}
 Total: ${x.TotalPrettified}
 `;
     let spyReports = "";
-    for (let key in unsafeWindow.spyReports){
+    for (let key in unsafeWindow.spyReports) {
         spyReports += spyReportTemplate(unsafeWindow.spyReports[key]);
     }
-    if (Object.entries(unsafeWindow.spyReports).length > 0){
+    if (Object.entries(unsafeWindow.spyReports).length > 0) {
         navigator.clipboard.writeText(spyReports)
-            .then(function(){
+            .then(function () {
                 copyBtn.innerHTML = 'Copied! <i class="fa fa-copy my-float"></i>';
-            }, function(){
+            }, function () {
                 copyBtn.innerHTML = 'Failed! <i class="fa fa-copy my-float"></i>';
             });
     } else {
         copyBtn.innerHTML = 'Empty! <i class="fa fa-copy my-float"></i>';
     }
-    setTimeout(() => { copyBtn.innerHTML = copyBtnHtml; }, 1000);
+    setTimeout(() => {
+        copyBtn.innerHTML = copyBtnHtml;
+    }, 1000);
 }
 
-function GetSpyResult(zEvent){
+function GetSpyResult(zEvent) {
     zEvent.preventDefault();
     let parseBtn = zEvent.target;
     let parseBtnHtml = parseBtn.innerHTML;
@@ -107,12 +113,14 @@ function GetSpyResult(zEvent){
         console.error(error);
         parseBtn.innerHTML = 'Failed! <i class="fa fa-search my-float"></i>';
     }
-    setTimeout(() => { parseBtn.innerHTML = parseBtnHtml; }, 1000);
+    setTimeout(() => {
+        parseBtn.innerHTML = parseBtnHtml;
+    }, 1000);
 }
 
-function GetSpyProfile(){
+function GetSpyProfile() {
     let jobSpecialBlock, userLink, levelSpan;
-    switch (unsafeWindow.playerJob){
+    switch (unsafeWindow.playerJob) {
         default:
         case SpyJobs.Army:
             jobSpecialBlock = document.getElementsByName("jobspecial")[0];
@@ -135,43 +143,43 @@ function GetSpyProfile(){
     let speed = 0;
     let dexterity = 0;
     let total = 0;
-    if (unsafeWindow.playerJob == SpyJobs.TelevisionNetwork || unsafeWindow.playerJob == SpyJobs.LawFirm){
+    if (unsafeWindow.playerJob == SpyJobs.TelevisionNetwork || unsafeWindow.playerJob == SpyJobs.LawFirm) {
         let statOffset = unsafeWindow.playerJob == SpyJobs.TelevisionNetwork ? 1 : 0;
         let statsBlock = jobSpecialBlock.querySelector("div > ul");
-        strength = Number(statsBlock.children[0+statOffset].innerText.substr(10).replaceAll(',', ''));
+        strength = Number(statsBlock.children[0 + statOffset].innerText.substr(10).replaceAll(',', ''));
         if (isNaN(strength)) strength = 0;
-        defense = Number(statsBlock.children[3+statOffset].innerText.substr(9).replaceAll(',', ''));
+        defense = Number(statsBlock.children[3 + statOffset].innerText.substr(9).replaceAll(',', ''));
         if (isNaN(defense)) defense = 0;
-        speed = Number(statsBlock.children[1+statOffset].innerText.substr(7).replaceAll(',', ''));
+        speed = Number(statsBlock.children[1 + statOffset].innerText.substr(7).replaceAll(',', ''));
         if (isNaN(speed)) speed = 0;
-        dexterity = Number(statsBlock.children[2+statOffset].innerText.substr(11).replaceAll(',', ''));
+        dexterity = Number(statsBlock.children[2 + statOffset].innerText.substr(11).replaceAll(',', ''));
         if (isNaN(dexterity)) dexterity = 0;
-        total = Number(statsBlock.children[4+statOffset].innerText.substr(7).replaceAll(',', ''));
+        total = Number(statsBlock.children[4 + statOffset].innerText.substr(7).replaceAll(',', ''));
         if (isNaN(total)) total = 0;
     } else if (unsafeWindow.playerJob == SpyJobs.Army) {
         let statsBlock = jobSpecialBlock.querySelector("div.specials-confirm-cont > div:nth-child(5) > ul");
         let strengthBlock = statsBlock.querySelector("li.left.t-c-border");
-        if (strengthBlock.innerText.search("Strength:") > -1){
+        if (strengthBlock.innerText.search("Strength:") > -1) {
             strength = Number(strengthBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
             if (isNaN(strength)) strength = 0;
         }
         let defenseBlock = statsBlock.querySelector("li.left.t-r-border");
-        if (defenseBlock.innerText.search("Defense:") > -1){
+        if (defenseBlock.innerText.search("Defense:") > -1) {
             defense = Number(defenseBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
             if (isNaN(defense)) defense = 0;
         }
         let speedBlock = statsBlock.querySelector("li.left.t-l-border");
-        if (speedBlock.innerText.search("Speed:") > -1){
+        if (speedBlock.innerText.search("Speed:") > -1) {
             speed = Number(speedBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
             if (isNaN(speed)) speed = 0;
         }
         let dexterityBlock = statsBlock.querySelector("li.left.b-l-border");
-        if (dexterityBlock.innerText.search("Dexterity:") > -1){
+        if (dexterityBlock.innerText.search("Dexterity:") > -1) {
             dexterity = Number(dexterityBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
             if (isNaN(dexterity)) dexterity = 0;
         }
         let totalBlock = statsBlock.querySelector("li.left.b-c-border");
-        if (totalBlock.innerText.search("Total:") > -1){
+        if (totalBlock.innerText.search("Total:") > -1) {
             total = Number(totalBlock.getElementsByClassName('desc')[0].innerText.replaceAll(',', ''));
             if (isNaN(total)) total = 0;
         }
@@ -180,7 +188,7 @@ function GetSpyProfile(){
     return new SpyReport(id, name, level, strength, defense, speed, dexterity, total, new Date());
 }
 
-function AddSpyProfile(spyProfile){
+function AddSpyProfile(spyProfile) {
     const profileTemplate = (x) => `<td data-name>${x.Name}</td><td data-level=${x.Level}>${x.Level}</td><td data-strength=${x.Strength}>${x.StrengthPrettified}</td><td data-defense=${x.Defense}>${x.DefensePrettified}</td><td data-speed=${x.Speed}>${x.SpeedPrettified}</td><td data-dexterity=${x.Dexterity}>${x.DexterityPrettified}</td><td data-total=${x.Total}>${x.TotalPrettified}</td><td data-updated=${x.UpdatedTimeStamp}>${x.UpdatedDate}</td>`;
 
     let spyTableBody = document.querySelector('#spy-parse-tbl tbody');
@@ -248,10 +256,14 @@ function AddSpyProfile(spyProfile){
     unsafeWindow.spyReports[spyProfile.Id] = spyProfile;
 }
 
-function FlashElement(element){
+function FlashElement(element) {
     let previousBackgroundColor = element.style.backgroundColor;
-    setTimeout(() => { element.style.backgroundColor = "green"; }, 10);
-    setTimeout(() => { element.style.backgroundColor = previousBackgroundColor; }, 400);
+    setTimeout(() => {
+        element.style.backgroundColor = "green";
+    }, 10);
+    setTimeout(() => {
+        element.style.backgroundColor = previousBackgroundColor;
+    }, 400);
 }
 
 class SpyReport {
@@ -259,27 +271,38 @@ class SpyReport {
     Name = '';
     Level = 0;
     Strength = 0;
-    get StrengthPrettified(){
+
+    get StrengthPrettified() {
         return this.Strength.toLocaleString('EN');
     }
+
     Defense = 0;
-    get DefensePrettified(){
+
+    get DefensePrettified() {
         return this.Defense.toLocaleString('EN');
     }
+
     Speed = 0;
-    get SpeedPrettified(){
+
+    get SpeedPrettified() {
         return this.Speed.toLocaleString('EN');
     }
+
     Dexterity = 0;
-    get DexterityPrettified(){
+
+    get DexterityPrettified() {
         return this.Dexterity.toLocaleString('EN');
     }
+
     Total = 0;
-    get TotalPrettified(){
+
+    get TotalPrettified() {
         return this.Total.toLocaleString('EN');
     }
+
     UpdatedTimeStamp = new Date(0);
-    get UpdatedDate(){
+
+    get UpdatedDate() {
         return this.UpdatedTimeStamp.toLocaleDateString('RU');
     }
 
@@ -298,7 +321,7 @@ class SpyReport {
 
     calculateStats() {
         let statsKnown = Number(this.Strength > 0) + Number(this.Defense > 0) + Number(this.Speed > 0) + Number(this.Dexterity > 0) + Number(this.Total > 0);
-        if (statsKnown === 4){
+        if (statsKnown === 4) {
             if (Number(this.Strength === 0)) this.Strength = this.Total - this.Defense - this.Speed - this.Dexterity;
             if (Number(this.Defense === 0)) this.Defense = this.Total - this.Strength - this.Speed - this.Dexterity;
             if (Number(this.Speed === 0)) this.Speed = this.Total - this.Strength - this.Defense - this.Dexterity;
